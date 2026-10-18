@@ -1,0 +1,61 @@
+<!-- ไฟล์: foodgroup.html -->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หมวดหมู่สินค้า - ลาบหนองบัวลำภู</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        html, body { 
+            background-color: #ffffff; color: #1e293b; 
+            font-family: 'Sarabun', sans-serif; margin: 0; padding: 12px; 
+            user-select: none; height: 100%; box-sizing: border-box;
+        }
+        .group-btn {
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 1rem;
+            padding: 12px; display: flex; align-items: center; justify-content: flex-start; gap: 12px;
+            font-weight: 700; font-size: 14px; color: #334155; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: all 0.2s ease; cursor: pointer; text-align: left; width: 100%;
+        }
+        .group-btn:hover { background-color: #f8fafc; border-color: #cbd5e1; }
+        .group-btn:active { transform: scale(0.98); }
+    </style>
+</head>
+<body class="flex flex-col h-full">
+    <!-- UI ปุ่มหมวดหมู่ที่แยกออกมา -->
+    <div class="grid grid-cols-2 gap-3 w-full">
+        <button type="button" onclick="parent.postMessage({type: 'OPEN_SELECT_FOOD', catId: 1}, '*')" class="group-btn">
+            <span class="text-xl">🍱</span> <span>กับข้าว</span>
+        </button>
+        <button type="button" onclick="parent.postMessage({type: 'OPEN_SELECT_FOOD', catId: 2}, '*')" class="group-btn">
+            <span class="text-xl">🍲</span> <span>ข้าวกล่อง</span>
+        </button>
+        <button type="button" onclick="parent.postMessage({type: 'OPEN_SELECT_FOOD', catId: 3}, '*')" class="group-btn">
+            <span class="text-xl">🍳</span> <span>ข้าว / ข้าวต้ม</span>
+        </button>
+        <button type="button" onclick="parent.postMessage({type: 'OPEN_SELECT_FOOD', catId: 4}, '*')" class="group-btn">
+            <span class="text-xl">🍚</span> <span>ข้าวผัด</span>
+        </button>
+        <button type="button" onclick="parent.postMessage({type: 'OPEN_SELECT_FOOD', catId: 5}, '*')" class="group-btn">
+            <span class="text-xl">🥩</span> <span>ต้ม / แกง</span>
+        </button>
+        <button type="button" onclick="parent.postMessage({type: 'OPEN_SELECT_FOOD', catId: 6}, '*')" class="group-btn">
+            <span class="text-xl">⭐</span> <span>ทอด / ย่าง / ยำ</span>
+        </button>
+        <button type="button" onclick="parent.postMessage({type: 'OPEN_SELECT_FOOD', catId: 7}, '*')" class="group-btn">
+            <span class="text-xl">🥗</span> <span>ลาบ / ก้อย</span>
+        </button>
+        <button type="button" onclick="parent.postMessage({type: 'OPEN_SELECT_FOOD', catId: 8}, '*')" class="group-btn">
+            <span class="text-xl">🛍️</span> <span>ส้มตำ</span>
+        </button>
+        <button type="button" onclick="parent.postMessage({type: 'OPEN_SELECT_FOOD', catId: 9}, '*')" class="group-btn">
+            <span class="text-xl">🍽️</span> <span>ลูกค้าฝากซื้อ</span>
+        </button>
+        <button type="button" onclick="parent.postMessage({type: 'OPEN_SPECIAL_MENU'}, '*')" class="group-btn">
+            <span class="text-xl">🍱</span> <span>เมนูพิเศษ</span>
+        </button>
+    </div>
+</body>
+</html>

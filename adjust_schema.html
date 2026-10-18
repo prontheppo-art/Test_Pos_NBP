@@ -271,27 +271,38 @@
       }
     }
 
+    // ฟังก์ชันสำหรับปุ่ม "คัดลอก schema.sql" โดยเฉพาะ (ดึงเฉพาะโครงสร้าง ชื่อตารางและคอลัมน์ ไม่เอาข้อมูลแถว)
     async function exportSchemaOnly() {
       const status = document.getElementById('statusText');
-      status.innerHTML = "⏳ กำลังสร้างและคัดลอก schema.sql...";
+      status.innerHTML = "⏳ กำลังดึงโครงสร้าง Schema ทุกตาราง...";
       
-      const tableList = Object.keys(tableCommentsMap);
+      // ดึงรายชื่อตารางจากฐานข้อมูลมาทันทีโดยไม่ต้องกดปุ่มดึงตารางก่อน
+      const tableList = await fetchTablesWithComments();
+      
       if (tableList.length === 0) {
-        status.innerHTML = `<span class="text-rose-400">❌ ไม่พบตารางในฐานข้อมูล กรุณากดปุ่ม 'ดึงตาราง' ก่อน</span>`;
+        status.innerHTML = `<span class="text-rose-400">❌ ไม่พบตาราง หรือไม่สามารถเชื่อมต่อฐานข้อมูลได้</span>`;
         return;
       }
 
       let sqlStatements = [
         "-- ========================================================",
-        "-- FILE: schema.sql",
+        "-- FILE: schema.sql (Structure Only)",
         `-- Date: ${new Date().toLocaleString()}`,
         "-- ========================================================\n"
       ];
 
       for (const tableName of tableList) {
         try {
-          const { data } = await supabaseClient.from(tableName).select('*').limit(1);
-          sqlStatements.push(buildTableSQL(tableName, data || [], false));
+          // ดึงมาแค่ 1 แถวเพื่อเอาชื่อคอลัมน์มาทำโครงสร้าง CREATE TABLE (กำหนด includeData เป็น false)
+          let sampleData = [];
+          if (tablesDataCache[tableName] && tablesDataCache[tableName].length > 0) {
+            sampleData = [tablesDataCache[tableName][0]];
+          } else {
+            const { data } = await supabaseClient.from(tableName).select('*').limit(1);
+            sampleData = data || [];
+          }
+          
+          sqlStatements.push(buildTableSQL(tableName, sampleData, false));
         } catch (err) {
           console.error(`Error processing table ${tableName}:`, err);
         }
@@ -300,7 +311,7 @@
       const schemaSQL = sqlStatements.join("\n");
       if (schemaSQL) {
         await navigator.clipboard.writeText(schemaSQL);
-        status.innerHTML = `<span class="text-amber-300">📋 คัดลอกโค้ด schema.sql ลง Clipboard แล้ว</span>`;
+        status.innerHTML = `<span class="text-amber-300">📋 คัดลอกโค้ด schema.sql (เฉพาะโครงสร้าง) ลง Clipboard แล้ว (${tableList.length} ตาราง)</span>`;
       } else {
         status.innerHTML = `<span class="text-rose-400">❌ ไม่สามารถคัดลอก SQL ได้</span>`;
       }
