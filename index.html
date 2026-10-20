@@ -1,3 +1,4 @@
+<!-- ไฟล์: index.html (รวมหน้าหลักและหน้าผู้ดูแลระบบ - ไม่มีระบบรหัสผ่าน) -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -96,15 +97,19 @@
         .btn-blue { background-color: #2563eb; }
         .btn-emerald { background-color: #059669; }
         .btn-amber-600 { background-color: #d97706; }
-        .btn-slate { background-color: #334155; }
         .btn-teal { background-color: #0d9488; }
+        .btn-cyan { background-color: #0891b2; }
+        .btn-indigo { background-color: #4f46e5; }
+        .btn-purple { background-color: #7c3aed; }
+        .btn-slate { background-color: #334155; }
+        .btn-rose { background-color: #e11d48; }
     </style>
 </head>
 <body>
 
 <div class="app-layout">
     
-    <!-- ส่วนหน้าหลัก (Home View) -->
+    <!-- 1. หน้าหลัก (Home View) -->
     <div id="homeView" class="main-card">
         <div class="header-section">
             <h1 class="font-extrabold text-lg text-slate-800 leading-snug">ลาบหนองบัวลำภู</h1>
@@ -116,7 +121,6 @@
             <button type="button" onclick="goToPage('ordersystem.html?tab=1')" class="menu-btn btn-blue">
                 <span>📝 หน้าสั่งอาหาร</span>
             </button>
-            <!-- ปรับแก้ลิงก์ไปยังไฟล์ QuickOrder.html ตามที่ต้องการ -->
             <button type="button" onclick="goToPage('QuickOrder.html')" class="menu-btn btn-emerald">
                 <span>⚡ สั่งด่วน</span>
             </button>
@@ -129,9 +133,42 @@
             <button type="button" onclick="goToPage('linereport.html')" class="menu-btn btn-teal">
                 <span>💬 Line Report</span>
             </button>
-            <!-- ลิงก์ไปหน้าแยก adminlogin.html -->
-            <button type="button" onclick="goToPage('adminlogin.html')" class="menu-btn btn-slate">
+            <!-- ปุ่มคลิกเพื่อเปิดหน้าผู้ดูแลระบบ (สลับแสดงหน้าแอดมินทันทีโดยไม่ถามรหัส) -->
+            <button type="button" onclick="showAdminView()" class="menu-btn btn-slate">
                 <span>🔒 ผู้ดูแลระบบ</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. หน้าผู้ดูแลระบบ (Admin View - สลับแสดงผลเมื่อกดปุ่มผู้ดูแลระบบ) -->
+    <div id="adminView" class="main-card" style="display: none;">
+        <div class="header-section">
+            <div class="text-2xl mb-0.5">🔓</div>
+            <h1 class="font-extrabold text-lg text-slate-800 leading-snug">ผู้ดูแลระบบ</h1>
+            <p class="text-[11px] text-slate-400 mt-0.5">จัดการระบบร้านอาหารและตรวจสอบข้อมูล</p>
+        </div>
+
+        <div class="menu-list">
+            <button type="button" onclick="goToPage('adjust_schema.html')" class="menu-btn btn-amber-600">
+                <span>🛠 จัดการฐานข้อมูล & Schema</span>
+            </button>
+            <button type="button" onclick="goToPage('set_location_pricing.html')" class="menu-btn btn-teal">
+                <span>📍 ตั้งค่าราคาตามพื้นที่</span>
+            </button>
+            <button type="button" onclick="goToPage('settings_delivery.html')" class="menu-btn btn-cyan">
+                <span>🚚 ตั้งค่าการจัดส่ง</span>
+            </button>
+            <button type="button" onclick="goToPage('cost.html')" class="menu-btn btn-indigo">
+                <span>💰 จัดการต้นทุน</span>
+            </button>
+            <button type="button" onclick="goToPage('stock_dashboard.html')" class="menu-btn btn-purple">
+                <span>📦 จัดการสต็อกวัตถุดิบ</span>
+            </button>
+            <button type="button" onclick="goToPage('changepwd.html')" class="menu-btn btn-slate">
+                <span>🔑 เปลี่ยนรหัสผ่านแอดมิน</span>
+            </button>
+            <button type="button" onclick="showHomeView()" class="menu-btn btn-rose">
+                <span>🏠 กลับหน้าหลัก</span>
             </button>
         </div>
     </div>
@@ -161,6 +198,16 @@
 
     function goToPage(url) {
         window.location.href = url;
+    }
+
+    function showAdminView() {
+        document.getElementById('homeView').style.display = 'none';
+        document.getElementById('adminView').style.display = 'flex';
+    }
+
+    function showHomeView() {
+        document.getElementById('adminView').style.display = 'none';
+        document.getElementById('homeView').style.display = 'flex';
     }
 </script>
 </body>

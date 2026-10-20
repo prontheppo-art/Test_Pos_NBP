@@ -49,42 +49,6 @@
           width: 100%;
       }
 
-      .cat-nav-btn {
-          position: relative;
-          background-color: #ffffff;
-          border: 1.5px solid #cbd5e1;
-          color: #1e293b;
-          font-size: 0.9rem;
-          font-weight: 700;
-          padding: 0.75rem 0.5rem;
-          border-radius: 0.85rem;
-          text-align: center;
-          white-space: nowrap;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-          transition: all 0.15s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.35rem;
-          min-height: 52px;
-          cursor: pointer;
-          width: 100%;
-          text-decoration: none;
-      }
-
-      .cat-nav-btn:active {
-          background-color: #0f172a;
-          color: #ffffff;
-          border-color: #0f172a;
-          transform: scale(0.96);
-      }
-
-      .cat-nav-icon {
-          font-size: 1.25rem;
-          display: inline-block;
-          flex-shrink: 0;
-      }
-
       .excel-table {
           width: 100%;
           border-collapse: collapse;
@@ -523,7 +487,7 @@
                     return a.name.localeCompare(b.name, ['th', 'en'], { numeric: true, sensitivity: 'base' });
                 });
 
-                renderQuickNav();
+                await renderQuickNav();
                 renderCategoryList();
             } catch (err) {
                 console.error("Error loading data:", err);
@@ -531,15 +495,90 @@
             }
         }
 
-        function renderQuickNav() {
+        // ฟังก์ชันดึงโครงสร้างปุ่ม และ CSS จากไฟล์ foodgroup.html มาใช้งานแบบ Dynamic
+        async function renderQuickNav() {
             const navContainer = document.getElementById('quickNavContainer');
             if (!navContainer) return;
-            navContainer.innerHTML = '';
 
             if (foodGroups.length === 0) {
                 navContainer.innerHTML = `<div class="col-span-2 text-center w-full text-slate-400 text-xs py-10 font-medium">ยังไม่มีหมวดหมู่อาหาร</div>`;
                 return;
             }
+
+            try {
+                // ดึงไฟล์ foodgroup.html
+                const response = await fetch('foodgroup.html');
+                if (!response.ok) throw new Error('ไม่สามารถโหลดไฟล์ foodgroup.html ได้');
+                const htmlText = await response.text();
+
+                // สร้าง Parser เพื่อแกะเอาเฉพาะ CSS และ Element ด้านใน
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+
+                // นำแท็ก style จาก foodgroup.html มาใส่ในหน้านี้ (ถ้ายังไม่มี)
+                doc.querySelectorAll('style').forEach(styleTag => {
+                    if (!document.getElementById('externalFoodGroupStyle')) {
+                        const newStyle = document.createElement('style');
+                        newStyle.id = 'externalFoodGroupStyle';
+                        newStyle.textContent = styleTag.textContent;
+                        document.head.appendChild(newStyle);
+                    }
+                });
+
+                // ดึง Template ของ Container ปุ่มหลักจาก foodgroup.html
+                const externalContainer = doc.querySelector('#quickNavContainer') || doc.querySelector('.category-nav-wrap');
+                
+                if (externalContainer) {
+                    navContainer.innerHTML = '';
+                    
+                    // สร้างปุ่มใหม่โดยใช้ดีไซน์ของแม่แบบแต่ผูก Event เปิด Modal แก้ไขราคา
+                    foodGroups.forEach((cat, index) => {
+                        if (cat.name === 'importmain') return;
+
+                        const icon = categoryIcons[index % categoryIcons.length];
+                        
+                        // ค้นหาโครงสร้างปุ่มจาก foodgroup.html (ถ้ามี)
+                        const sampleBtn = doc.querySelector('.cat-nav-btn');
+                        const btn = sampleBtn ? sampleBtn.cloneNode(true) : document.createElement('button');
+                        
+                        btn.type = 'button';
+                        if (!sampleBtn) btn.className = 'cat-nav-btn';
+
+                        // หยอดข้อมูลชื่อกลุ่มและไอคอนลงในแม่แบบ
+                        const iconSpan = btn.querySelector('.cat-nav-icon');
+                        if (iconSpan) {
+                            iconSpan.textContent = icon;
+                        }
+
+                        const textSpan = btn.querySelector('span:not(.cat-nav-icon)') || btn;
+                        textSpan.textContent = cat.name;
+
+                        if (!iconSpan && !sampleBtn) {
+                            btn.innerHTML = `<span class="cat-nav-icon">${icon}</span> <span>${cat.name}</span>`;
+                        }
+
+                        // ผูกการทำงานให้เปิด Modal ตารางแก้ไขราคาของ managemenu.html
+                        btn.onclick = (e) => {
+                            e.preventDefault();
+                            openCategoryPriceModalHTML(cat);
+                        };
+
+                        navContainer.appendChild(btn);
+                    });
+                } else {
+                    fallbackRenderQuickNav();
+                }
+            } catch (err) {
+                console.warn("ไม่สามารถดึง foodgroup.html ได้ กำลังใช้โหมดสำรอง:", err.message);
+                fallbackRenderQuickNav();
+            }
+        }
+
+        // ฟังก์ชันสำรองกรณีดึงไฟล์ foodgroup.html ไม่สำเร็จ
+        function fallbackRenderQuickNav() {
+            const navContainer = document.getElementById('quickNavContainer');
+            if (!navContainer) return;
+            navContainer.innerHTML = '';
 
             foodGroups.forEach((cat, index) => {
                 if (cat.name === 'importmain') return;
@@ -549,7 +588,6 @@
                 btn.type = 'button';
                 btn.className = 'cat-nav-btn';
                 btn.innerHTML = `<span class="cat-nav-icon">${icon}</span> <span>${cat.name}</span>`;
-
                 btn.onclick = () => openCategoryPriceModalHTML(cat);
 
                 navContainer.appendChild(btn);
