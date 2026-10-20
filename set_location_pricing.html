@@ -1,4 +1,4 @@
-<!-- ไฟล์: set_location_pricing.html (ฉบับซ่อนคอลัมน์ราคามาตรฐาน) -->
+<!-- ไฟล์: set_location_pricing.html (ฉบับแก้ไขลิงก์ปุ่มด้านล่างให้ถูกต้อง) -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -54,6 +54,7 @@
           align-items: center;
           justify-content: center;
           z-index: 9999;
+          padding: 1rem;
       }
       .custom-modal-overlay.active {
           display: flex !important;
@@ -62,8 +63,8 @@
           background: white;
           border-radius: 20px;
           padding: 20px;
-          width: 92%;
-          max-width: 440px;
+          width: 100%;
+          max-width: 28rem;
           max-height: 85vh;
           display: flex;
           flex-direction: column;
@@ -99,7 +100,6 @@
           display: none !important;
       }
 
-      /* ช่องกรอกข้อมูลราคาพิเศษแบบ Excel ไร้กรอบตอนปกติ กลมกลืนกับตาราง */
       .excel-input {
           border: none;
           background: transparent;
@@ -133,7 +133,7 @@
         <!-- Location Selector Section -->
         <div class="p-3 bg-slate-50 border-b border-slate-200 shrink-0">
             <div class="bg-amber-50/50 border border-amber-200/80 rounded-2xl p-3 shadow-sm">
-                <button type="button" onclick="openLocationModal()" class="w-full h-[46px] bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition">
+                <button type="button" onclick="openLocationModal()" class="w-full h-[46px] bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer">
                     <span class="text-sm">📍</span>
                     <span id="locationBtnText" class="truncate">-- กรุณาเลือกสถานที่ / รีสอร์ต --</span>
                 </button>
@@ -147,15 +147,11 @@
             </div>
         </div>
 
-        <!-- Footer Navigation Section -->
-        <div class="p-3 bg-white border-t border-slate-100 shrink-0 grid grid-cols-2 gap-2">
-            <button type="button" onclick="resetToHome()" 
-               class="bg-slate-700 hover:bg-slate-800 active:scale-95 text-white font-bold py-3 px-2 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md transition cursor-pointer">
-                🏠 หน้าแรกเพจนี้
-            </button>
-            <a href="index_admin.html" 
-               class="bg-rose-500 hover:bg-rose-600 active:scale-95 text-white font-bold py-3 px-2 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md no-underline text-center transition">
-                🚪 หน้าผู้ดูแลระบบ
+        <!-- Footer Navigation Section (ลิงก์กลับไปที่ index.html ถูกต้องตามโครงสร้างไฟล์) -->
+        <div class="p-3 bg-white border-t border-slate-100 shrink-0">
+            <a href="index.html" 
+               class="w-full bg-rose-500 hover:bg-rose-600 active:scale-95 text-white font-bold py-3 px-2 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md no-underline text-center transition cursor-pointer">
+                🏠 กลับหน้าหลัก
             </a>
         </div>
 
@@ -166,10 +162,15 @@
         <div class="custom-modal-box border-t-4 border-amber-500" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-3 pb-2 border-b">
                 <h3 class="font-bold text-base text-slate-800 flex items-center gap-1.5">📍 เลือกสถานที่ / รีสอร์ต</h3>
-                <button onclick="closeModal('locationModal')" class="text-gray-400 hover:text-gray-600 font-bold text-lg px-1">✕</button>
+                <button onclick="closeModal('locationModal')" class="text-gray-400 hover:text-gray-600 font-bold text-lg px-1 cursor-pointer">✕</button>
             </div>
-
-            <div id="locationGrid" class="grid grid-cols-2 gap-2 overflow-y-auto py-1 pr-1 max-h-[60vh]"></div>
+            <div class="mb-2">
+                <input type="text" id="newLocationInput" placeholder="➕ เพิ่มสถานที่ใหม่..." class="w-full h-9 px-3 text-xs rounded-xl border border-amber-300 bg-white outline-none mb-2">
+                <button type="button" onclick="addNewLocation()" class="w-full h-9 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition cursor-pointer shadow-sm">+ เพิ่มสถานที่ใหม่</button>
+            </div>
+            <div id="locationGrid" class="grid grid-cols-2 gap-2.5 overflow-y-auto py-1 pr-1 max-h-[50vh]">
+                <span class="text-slate-400 text-xs py-8 text-center col-span-2 block">⏳ กำลังโหลดข้อมูล...</span>
+            </div>
         </div>
     </div>
 
@@ -285,7 +286,7 @@
 
         async function loadLocations() {
             try {
-                const { data, error } = await db.from('locations').select('*').order('name', { ascending: true });
+                const { data, error } = await db.from('locations').select('*').order('location_name', { ascending: true });
                 if (error) throw error;
                 locationsData = data || [];
             } catch (err) {
@@ -294,253 +295,18 @@
         }
 
         function openLocationModal() {
+            renderLocationsView();
+            openModal('locationModal');
+        }
+
+        function renderLocationsView() {
             const grid = document.getElementById('locationGrid');
             if (!grid) return;
             grid.innerHTML = '';
 
             if (locationsData.length === 0) {
-                grid.innerHTML = `<div class="col-span-2 text-center text-slate-400 text-xs py-4">ไม่พบข้อมูลสถานที่</div>`;
-            }
-
-            locationsData.forEach(loc => {
-                let icon = '🏨';
-                if (loc.name.includes('บาหลี')) icon = '🏝️';
-                else if (loc.name.includes('บ้านเขา')) icon = '🏡';
-                else if (loc.name.includes('ชิลล์')) icon = '☕';
-                else if (loc.name.includes('หน้าร้าน')) icon = '🏪';
-
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'flex flex-col items-center justify-center p-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition cursor-pointer shadow-sm active:scale-95';
-                btn.innerHTML = `
-                    <span class="text-xl mb-1">${icon}</span>
-                    <span class="text-sm font-bold text-slate-800 text-center leading-tight truncate w-full">${loc.name}</span>
-                `;
-                btn.onclick = () => selectLocation(loc);
-                grid.appendChild(btn);
-            });
-
-            openModal('locationModal');
-        }
-
-        function resetToHome() {
-            selectedLocationId = null;
-            selectedLocationName = '';
-            document.getElementById('locationBtnText').innerText = '-- กรุณาเลือกสถานที่ / รีสอร์ต --';
-            document.getElementById('quickNavContainer').innerHTML = `<div class="col-span-2 text-center w-full text-slate-400 text-xs py-10 font-medium">⏳ กรุณาเลือกสถานที่หรือรีสอร์ตด้านบนก่อน...</div>`;
-            window.scrollTo({ top: 0, height: 'smooth' });
-        }
-
-        async function selectLocation(loc) {
-            selectedLocationId = loc.location_id || loc.id;
-            selectedLocationName = loc.name;
-
-            document.getElementById('locationBtnText').innerText = selectedLocationName;
-            closeModal('locationModal');
-
-            await loadCustomPricesForLocation(selectedLocationId);
-            renderQuickNav();
-        }
-
-        async function loadFoodGroups() {
-            try {
-                const { data: fgData, error } = await db.from('food_groups').select('*');
-                if (error) throw error;
-                
-                rawFoodGroupsData = fgData || [];
-                foodGroups = rawFoodGroupsData.map(g => ({
-                    id: g.food_group_id || g.id,
-                    name: g.name || g.food_group_name || 'อื่นๆ'
-                }));
-                
-                const seen = new Set();
-                foodGroups = foodGroups.filter(g => {
-                    if (seen.has(g.name) || g.name === 'importmain') return false;
-                    seen.add(g.name);
-                    return true;
-                }).sort((a, b) => a.name.localeCompare(b.name, ['th', 'en'], { numeric: true }));
-
-                if (selectedLocationId) {
-                    renderQuickNav();
-                }
-            } catch (err) {
-                console.error("Error loading groups:", err);
-            }
-        }
-
-        function renderQuickNav() {
-            const navContainer = document.getElementById('quickNavContainer');
-            if (!navContainer) return;
-            navContainer.innerHTML = '';
-
-            if (foodGroups.length === 0) {
-                navContainer.innerHTML = `<div class="col-span-2 text-center w-full text-slate-400 text-xs py-10 font-medium">ยังไม่มีหมวดหมู่อหาร</div>`;
+                grid.innerHTML = `<span class="text-slate-400 text-xs py-8 text-center col-span-2 block">ไม่พบข้อมูลสถานที่</span>`;
                 return;
             }
 
-            foodGroups.forEach((cat, index) => {
-                const icon = categoryIcons[index % categoryIcons.length];
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'cat-nav-btn';
-                btn.innerHTML = `<span class="cat-nav-icon">${icon}</span> <span>${cat.name}</span>`;
-                btn.onclick = () => openCategoryModal(cat.name);
-                navContainer.appendChild(btn);
-            });
-        }
-
-        async function loadCustomPricesForLocation(locationId) {
-            try {
-                const { data, error } = await db
-                    .from('location_food_prices')
-                    .select('food_id, custom_price')
-                    .eq('location_id', locationId);
-
-                if (error) throw error;
-
-                currentCustomPrices = {};
-                (data || []).reverse().forEach(p => {
-                    currentCustomPrices[p.food_id] = p.custom_price;
-                });
-            } catch (err) {
-                console.error("Error loading custom prices:", err);
-            }
-        }
-
-        async function openCategoryModal(groupName) {
-            if (!selectedLocationId) {
-                showAlertModal('กรุณาเลือกสถานที่/รีสอร์ต ด้านบนก่อนเลือกหมวดหมู่อหารครับ', 'warning');
-                return;
-            }
-
-            currentGroupName = groupName;
-            document.getElementById('groupNameTitle').textContent = currentGroupName;
-            document.getElementById('locationBadge').textContent = `สถานที่: ${selectedLocationName}`;
-            
-            openModal('popupModalWrapper');
-            await loadCategoryFoodsAndPrices(selectedLocationId, groupName);
-        }
-
-        async function loadCategoryFoodsAndPrices(locationId, groupName) {
-            const container = document.getElementById('foodListContainer');
-            container.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400 text-xs">⏳ กำลังโหลดรายการอาหาร...</td></tr>`;
-
-            try {
-                await loadCustomPricesForLocation(locationId);
-
-                let foods = [];
-
-                const { data: f1 } = await db.from('foods').select('*').eq('food_group', groupName);
-                if (f1 && f1.length > 0) foods = f1;
-
-                if (foods.length === 0) {
-                    const { data: f2 } = await db.from('foods').select('*').ilike('food_group', `%${groupName}%`);
-                    if (f2 && f2.length > 0) foods = f2;
-                }
-
-                if (foods.length === 0) {
-                    const matchedGroups = rawFoodGroupsData.filter(g => (g.name === groupName || g.food_group_name === groupName));
-                    const groupIds = matchedGroups.map(g => g.food_group_id || g.id).filter(Boolean);
-
-                    if (groupIds.length > 0) {
-                        const { data: f3 } = await db.from('foods').select('*').in('food_group_id', groupIds);
-                        if (f3 && f3.length > 0) foods = f3;
-                    }
-                }
-
-                if (foods.length === 0) {
-                    const { data: allFoods } = await db.from('foods').select('*');
-                    if (allFoods) {
-                        foods = allFoods.filter(f => {
-                            return f.food_group === groupName || 
-                                   f.category === groupName || 
-                                   f.group_name === groupName;
-                        });
-                    }
-                }
-
-                renderFoodRows(foods);
-
-            } catch (err) {
-                console.error("Error loading category foods:", err);
-                container.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-rose-500 text-xs">เกิดข้อผิดพลาด: ${err.message}</td></tr>`;
-            }
-        }
-
-        function renderFoodRows(foods) {
-            const container = document.getElementById('foodListContainer');
-            container.innerHTML = '';
-
-            if (!foods || foods.length === 0) {
-                container.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400 text-xs">❌ ไม่พบรายการอาหารในหมวดหมู่นี้</td></tr>`;
-                return;
-            }
-
-            foods.sort((a, b) => (a.name || '').localeCompare(b.name || '', ['th', 'en']));
-
-            foods.forEach(food => {
-                const foodId = food.food_id || food.id; 
-                const customPrice = currentCustomPrices[foodId];
-                const displayVal = (customPrice !== undefined && customPrice !== null) ? customPrice : '';
-
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-100 transition";
-                
-                tr.innerHTML = `
-                    <td class="font-bold text-slate-800 px-2 truncate" style="font-size: 14px;" title="${food.name}">
-                        🏨 <span class="truncate">${food.name}</span>
-                    </td>
-                    <td class="text-center text-slate-500 text-[11px] font-medium p-0 col-std-price">
-                        ${food.price_1 || 0}
-                    </td>
-                    <td class="text-center text-slate-500 text-[11px] font-medium p-0 col-std-price">
-                        ${food.price_2 || 0}
-                    </td>
-                    <td class="text-center text-slate-500 text-[11px] font-medium p-0 col-std-price">
-                        ${food.price_3 || 0}
-                    </td>
-                    <td class="text-center align-middle p-0 bg-amber-50/40">
-                        <input type="text" placeholder="ตาม Std" 
-                            value="${displayVal}" 
-                            onfocus="this.select()" 
-                            onblur="saveCustomPrice(${foodId}, this.value)" 
-                            class="excel-input"
-                            title="กรอกเฉพาะราคาที่สถานที่นี้ไม่เหมือนราคาปกติ">
-                    </td>
-                `;
-                container.appendChild(tr);
-            });
-        }
-
-        async function saveCustomPrice(foodId, value) {
-            if (!selectedLocationId || !foodId) return;
-
-            const valTrim = value.trim();
-
-            try {
-                if (valTrim === '') {
-                    await db.from('location_food_prices')
-                        .delete()
-                        .match({ location_id: parseInt(selectedLocationId), food_id: parseInt(foodId) });
-                    
-                    delete currentCustomPrices[foodId];
-                } else {
-                    const newPrice = parseFloat(valTrim) || 0;
-                    
-                    const { error } = await db.from('location_food_prices').upsert({
-                        location_id: parseInt(selectedLocationId),
-                        food_id: parseInt(foodId),
-                        custom_price: newPrice
-                    }, { onConflict: 'location_id, food_id' });
-
-                    if (error) throw error;
-                    currentCustomPrices[foodId] = newPrice;
-                }
-            } catch (err) {
-                console.error("Save price error:", err);
-                showAlertModal('บันทึกราคาไม่สำเร็จ: ' + err.message, 'error');
-            }
-        }
-    </script>
-</body>
-</html>
+            locationsData.

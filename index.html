@@ -1,4 +1,4 @@
-<!-- ไฟล์: index.html (รวมหน้าหลักและหน้าผู้ดูแลระบบ - ไม่มีระบบรหัสผ่าน) -->
+<!-- ไฟล์: index.html (ปรับปรุงล่าสุด - เอาเมนูจัดการฐานข้อมูลและเปลี่ยนรหัสผ่านออกแล้ว) -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -133,14 +133,14 @@
             <button type="button" onclick="goToPage('linereport.html')" class="menu-btn btn-teal">
                 <span>💬 Line Report</span>
             </button>
-            <!-- ปุ่มคลิกเพื่อเปิดหน้าผู้ดูแลระบบ (สลับแสดงหน้าแอดมินทันทีโดยไม่ถามรหัส) -->
+            <!-- ปุ่มคลิกเพื่อเปิดหน้าผู้ดูแลระบบ -->
             <button type="button" onclick="showAdminView()" class="menu-btn btn-slate">
                 <span>🔒 ผู้ดูแลระบบ</span>
             </button>
         </div>
     </div>
 
-    <!-- 2. หน้าผู้ดูแลระบบ (Admin View - สลับแสดงผลเมื่อกดปุ่มผู้ดูแลระบบ) -->
+    <!-- 2. หน้าผู้ดูแลระบบ (Admin View - เอาปุ่มจัดการ DB และเปลี่ยนรหัสผ่านออกแล้ว) -->
     <div id="adminView" class="main-card" style="display: none;">
         <div class="header-section">
             <div class="text-2xl mb-0.5">🔓</div>
@@ -149,9 +149,6 @@
         </div>
 
         <div class="menu-list">
-            <button type="button" onclick="goToPage('adjust_schema.html')" class="menu-btn btn-amber-600">
-                <span>🛠 จัดการฐานข้อมูล & Schema</span>
-            </button>
             <button type="button" onclick="goToPage('set_location_pricing.html')" class="menu-btn btn-teal">
                 <span>📍 ตั้งค่าราคาตามพื้นที่</span>
             </button>
@@ -163,9 +160,6 @@
             </button>
             <button type="button" onclick="goToPage('stock_dashboard.html')" class="menu-btn btn-purple">
                 <span>📦 จัดการสต็อกวัตถุดิบ</span>
-            </button>
-            <button type="button" onclick="goToPage('changepwd.html')" class="menu-btn btn-slate">
-                <span>🔑 เปลี่ยนรหัสผ่านแอดมิน</span>
             </button>
             <button type="button" onclick="showHomeView()" class="menu-btn btn-rose">
                 <span>🏠 กลับหน้าหลัก</span>
