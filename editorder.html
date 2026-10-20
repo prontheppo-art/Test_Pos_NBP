@@ -402,8 +402,8 @@
             const typeId = Number(currentEditingOrder.customer_type_id || 1);
             selectEditCustomerGroup(typeId);
 
-            if (currentEditingOrder.customer_name || currentEditingOrder.nickname) {
-                const custName = removeDuplicateWords(currentEditingOrder.customer_name || currentEditingOrder.nickname || '');
+            if (currentEditingOrder.customer_name || currentEditingOrder.customer_name) {
+                const custName = removeDuplicateWords(currentEditingOrder.customer_name || currentEditingOrder.customer_name || '');
                 document.querySelectorAll('.customer-input-field').forEach(inp => inp.value = custName);
             }
 
@@ -958,7 +958,7 @@
             const updatePayload = {
                 customer_type_id: customerType,
                 customer_name: customerDisplayName,
-                nickname: customerDisplayName,
+                customer_name: customerDisplayName,
                 customer_id: customerObj ? String(customerObj.customer_id || '') : null,
                 location_id: locationId ? Number(locationId) : null,
                 zone_id: zoneId ? Number(zoneId) : null,
